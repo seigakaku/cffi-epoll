@@ -12,4 +12,6 @@
            #:einval #:emfile #:enfile #:enomem #:ebadf #:eexist
            #:eloop #:enoent #:enospc #:eperm #:efault #:eintr
 
-           #:timespec #:time #:sigset))
+           #:timespec #:time #:sigset
+
+           #:make-epoll #:control #:wait))

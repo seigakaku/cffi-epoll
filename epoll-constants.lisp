@@ -47,15 +47,20 @@
          (data "data" :type epoll-data))
 
  ;;;; Errors
-(constant (einval "EINVAL"))
-(constant (emfile "EMFILE"))
-(constant (enfile "ENFILE"))
-(constant (enomem "ENOMEM"))
-(constant (ebadf "EBADF"))
-(constant (eexist "EEXIST"))
-(constant (eloop "ELOOP"))
-(constant (enoent "ENOENT"))
-(constant (enospc "ENOSPC"))
-(constant (eperm "EPERM"))
-(constant (efault "EFAULT"))
-(constant (eintr "EINTR"))
+(constantenum (errno-values :base-type :int
+                            :define-constants nil)
+
+              ((:einval "EINVAL"))
+              ((:emfile "EMFILE"))
+              ((:enfile "ENFILE"))
+              ((:enomem "ENOMEM"))
+              ((:ebadf "EBADF"))
+              ((:eexist "EEXIST"))
+              ((:eloop "ELOOP"))
+              ((:enoent "ENOENT"))
+              ((:enospc "ENOSPC"))
+              ((:eperm "EPERM"))
+              ((:efault "EFAULT"))
+              ((:eintr "EINTR")))
+
+(cvar ("errno" errno) errno-values)
