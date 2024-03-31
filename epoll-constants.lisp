@@ -21,16 +21,13 @@
               ((:delele "EPOLL_CTL_DEL")))
 
 ;;;; epoll_ctl events bitmask
-(bitfield event
+(bitfield (event :base-type :uint32)
           ((:in "EPOLLIN"))
           ((:out "EPOLLOUT"))
           ((:read-hangup "EPOLLRDHUP"))
           ((:hangup "EPOLLHUP"))
           ((:priority "EPOLLPRI"))
-          ((:err "EPOLLERR")))
-
-;;;; epoll_ctl input flags
-(bitfield (flags :base-type :uint)
+          ((:err "EPOLLERR"))
           ((:edge-triggered "EPOLLET"))
           ((:level-triggered "EPOLLONESHOT"))
           ((:wakeup "EPOLLWAKEUP"))
@@ -43,8 +40,8 @@
         (u64 "u64" :type :uint64))
 
 (cstruct epoll-event "struct epoll_event"
-         (events "events" :type :uint32)
-         (data "data" :type epoll-data))
+         (events "events" :type event)
+         (data "data" :type (:union epoll-data)))
 
  ;;;; Errors
 (constantenum (errno-values :base-type :int
@@ -63,4 +60,4 @@
               ((:efault "EFAULT"))
               ((:eintr "EINTR")))
 
-(cvar ("errno" errno) errno-values)
+(cvar ("errno" errno) :int)

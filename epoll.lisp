@@ -51,6 +51,7 @@
 (deftype fd () `(signed-byte 32))
 (deftype epoll () `fd)
 (deftype operation () `(member ,@(foreign-enum-keyword-list 'operation)))
+(deftype event () `(member ,@(foreign-enum-keyword-list 'event)))
 
 (declaim (ftype (function (&optional boolean) epoll) make-epoll))
 (defun make-epoll (&optional (close-on-exec t))
@@ -59,12 +60,25 @@
         (simple-perror "epoll-create1")
         epoll-fd)))
 
-(declaim (ftype (function (epoll operation fd &optional t) *) control))
-(defun control (epoll-fd operation fd &optional event)
-  (when (minusp (epoll-ctl epoll-fd operation fd (if (eq operation :del) nil event)))
-    (simple-perror "epoll-ctl")))
+(declaim (ftype (function (epoll operation fd &rest (or null event foreign-pointer)) *) control))
+(defun control (epoll-fd operation fd &rest events)
+  (let ((ret
+          (cond
+            ((pointerp (car events)) (epoll-ctl epoll-fd operation fd (car events)))
+            ((and (not (eq operation :del)) events)
+             (with-foreign-object (event '(:struct epoll-event))
+               (let ((events (foreign-bitfield-value 'event events))
+                     (data (foreign-slot-value event '(:struct epoll-event) 'data)))
+                 (setf (foreign-slot-value event '(:struct epoll-event) 'events) events
+                       (foreign-slot-value data '(:union epoll-data) 'fd) fd))
+               (epoll-ctl epoll-fd operation fd event)))
+            (t (epoll-ctl epoll-fd operation fd nil)))))
+    (when (minusp ret)
+      (simple-perror "epoll-ctl"))))
 
 (declaim (ftype (function (epoll foreign-pointer fixnum &optional fixnum) *) wait))
 (defun wait (epoll events max-events &optional (timeout -1))
-  (when (minusp (epoll-wait epoll events max-events timeout))
-    (simple-perror "epoll-wait")))
+  (let ((retval (epoll-wait epoll events max-events timeout)))
+    (if (minusp retval)
+        (simple-perror "epoll-wait")
+        retval)))

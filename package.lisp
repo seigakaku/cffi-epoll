@@ -6,10 +6,14 @@
   (:export #:cloexec
            ;; CFFI Types
            #:sigset #:time #:timespec #:operation #:event #:flags #:epoll-data #:epoll-event
+           ;; CFFI Foreign Slots
+           #:events #:data #:ptr #:fd #:u32 #:u64
            ;; CFFI C Functions
            #:epoll-create #:epoll-create1 #:epoll-ctl #:epoll-wait #:epoll-pwait #:epoll-pwait2
+           ;; CFFI C variables
+           #:errno
 
            ;; Lisp types
-           #:fd #:epoll #:operation
+           #:fd #:epoll #:operation #:event
            ;; Low level lisp wrappers
            #:make-epoll #:control #:wait))
