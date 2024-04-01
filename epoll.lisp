@@ -76,9 +76,21 @@
     (when (minusp ret)
       (simple-perror "epoll-ctl"))))
 
-(declaim (ftype (function (epoll foreign-pointer fixnum &optional fixnum) *) wait))
-(defun wait (epoll events max-events &optional (timeout -1))
-  (let ((retval (epoll-wait epoll events max-events timeout)))
-    (if (minusp retval)
-        (simple-perror "epoll-wait")
-        retval)))
+(declaim (ftype (function (epoll
+                           foreign-pointer
+                           fixnum
+                           &key (:timeout-ms fixnum) (:catch-eintr boolean))
+                          *)
+                wait))
+(defun wait (epoll events max-events &key (timeout-ms -1) (catch-eintr t))
+  (if catch-eintr
+      (loop
+        for retval = (epoll-wait epoll events max-events timeout-ms)
+        while (and (minusp retval) (= errno eintr))
+        finally (if (minusp retval)
+                    (simple-perror "epoll-wait")
+                    (return retval)))
+      (let ((retval (epoll-wait epoll events max-events timeout-ms)))
+        (if (minusp retval)
+            (simple-perror "epoll-wait")
+            retval))))

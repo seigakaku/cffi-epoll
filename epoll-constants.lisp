@@ -22,12 +22,12 @@
 
 ;;;; epoll_ctl events bitmask
 (bitfield (event :base-type :uint32)
-          ((:in "EPOLLIN"))
-          ((:out "EPOLLOUT"))
+          ((:input "EPOLLIN"))
+          ((:output "EPOLLOUT"))
           ((:read-hangup "EPOLLRDHUP"))
           ((:hangup "EPOLLHUP"))
           ((:priority "EPOLLPRI"))
-          ((:err "EPOLLERR"))
+          ((:error "EPOLLERR"))
           ((:edge-triggered "EPOLLET"))
           ((:level-triggered "EPOLLONESHOT"))
           ((:wakeup "EPOLLWAKEUP"))
@@ -44,6 +44,7 @@
          (data "data" :type (:union epoll-data)))
 
  ;;;; Errors
+(constant (eintr "EINTR"))
 (constantenum (errno-values :base-type :int
                             :define-constants nil)
 
