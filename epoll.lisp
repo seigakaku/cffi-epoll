@@ -76,6 +76,12 @@
     (when (minusp ret)
       (simple-perror "epoll-ctl"))))
 
+#-sbcl
+(define-condition timeout (serious-condition)
+  ((seconds :initarg :seconds :type (or null number) :initform nil))
+  (:report (lambda (timeout stream)
+             (format stream "Timeout occured after ~d seconds." (slot-value timeout 'seconds)))))
+
 (declaim (ftype (function (epoll
                            foreign-pointer
                            fixnum
@@ -83,14 +89,13 @@
                           *)
                 wait))
 (defun wait (epoll events max-events &key (timeout-ms -1) (catch-eintr t))
-  (if catch-eintr
-      (loop
-        for retval = (epoll-wait epoll events max-events timeout-ms)
-        while (and (minusp retval) (= errno eintr))
-        finally (if (minusp retval)
-                    (simple-perror "epoll-wait")
-                    (return retval)))
-      (let ((retval (epoll-wait epoll events max-events timeout-ms)))
-        (if (minusp retval)
-            (simple-perror "epoll-wait")
-            retval))))
+  (let ((retval (if catch-eintr
+                    (loop
+                      for retval = (epoll-wait epoll events max-events timeout-ms)
+                      while (and (minusp retval) (= errno eintr))
+                      finally (return retval))
+                    (epoll-wait epoll events max-events timeout-ms))))
+    (cond
+      ((minusp retval) (simple-perror "epoll-wait"))
+      ((zerop retval) (error #+sbcl'sb-ext:timeout #-sbcl 'timeout :seconds (/ timeout-ms 10000)))
+      (t retval))))
