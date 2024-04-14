@@ -18,7 +18,7 @@
                          :define-constants nil)
               ((:add "EPOLL_CTL_ADD"))
               ((:modify "EPOLL_CTL_MOD"))
-              ((:delele "EPOLL_CTL_DEL")))
+              ((:delete "EPOLL_CTL_DEL")))
 
 ;;;; epoll_ctl events bitmask
 (bitfield (event :base-type :uint32)
