@@ -30,6 +30,7 @@
           ((:error "EPOLLERR"))
           ((:edge-triggered "EPOLLET"))
           ((:level-triggered "EPOLLONESHOT"))
+          ((:one-shot "EPOLLONESHOT"))
           ((:wakeup "EPOLLWAKEUP"))
           ((:exclusive "EPOLLEXCLUSIVE")))
 
