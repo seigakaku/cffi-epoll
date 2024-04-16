@@ -46,20 +46,4 @@
 
  ;;;; Errors
 (constant (eintr "EINTR"))
-(constantenum (errno-values :base-type :int
-                            :define-constants nil)
-
-              ((:einval "EINVAL"))
-              ((:emfile "EMFILE"))
-              ((:enfile "ENFILE"))
-              ((:enomem "ENOMEM"))
-              ((:ebadf "EBADF"))
-              ((:eexist "EEXIST"))
-              ((:eloop "ELOOP"))
-              ((:enoent "ENOENT"))
-              ((:enospc "ENOSPC"))
-              ((:eperm "EPERM"))
-              ((:efault "EFAULT"))
-              ((:eintr "EINTR")))
-
 (cvar ("errno" errno) :int)

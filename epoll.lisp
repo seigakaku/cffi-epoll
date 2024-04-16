@@ -35,16 +35,22 @@
 
 ;;; Utilities
 
+#-sbcl
 (defcfun (%strerror "strerror") :string
   (errno :int))
 
-(defun strerror (&optional (errno errno))
-  (%strerror (cffi:foreign-enum-value 'errno-values errno)))
+(defun strerror ()
+  #-sbcl
+  (%strerror (cffi:foreign-enum-value 'errno-values errno))
+  #+sbcl
+  (sb-int:strerror))
 
-(defun simple-perror (prefix &optional (errno errno))
+(defun simple-perror (prefix)
+  #-sbcl
   (error 'simple-error
          :format-control "~@<~A: ~2I~_~A~:>"
-         :format-arguments (list prefix (strerror errno))))
+         :format-arguments (list prefix (strerror errno)))
+  #+sbcl (sb-int:simple-perror prefix))
 
 ;;; Low level wrappers
 
@@ -76,7 +82,6 @@
     (when (minusp ret)
       (simple-perror "epoll-ctl"))))
 
-#-sbcl
 (define-condition timeout (serious-condition)
   ((seconds :initarg :seconds :type (or null number) :initform nil))
   (:report (lambda (timeout stream)
@@ -97,5 +102,5 @@
                     (epoll-wait epoll events max-events timeout-ms))))
     (cond
       ((minusp retval) (simple-perror "epoll-wait"))
-      ((zerop retval) (error #+sbcl'sb-ext:timeout #-sbcl 'timeout :seconds (/ timeout-ms 10000)))
+      ((zerop retval) (error 'timeout :seconds (/ timeout-ms 10000)))
       (t retval))))
