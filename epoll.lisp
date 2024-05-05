@@ -33,6 +33,9 @@
   (timeout (:pointer (:struct timespec)))
   (signal-mask sigset))
 
+(defcfun (%close "close") :int
+  (fildes :int))
+
 ;;; Utilities
 
 #-sbcl
@@ -65,6 +68,10 @@
     (if (minusp epoll-fd)
         (simple-perror "epoll-create1")
         epoll-fd)))
+
+(declaim (ftype (function (fd) *) epoll-close))
+(defun epoll-close (epoll-fd)
+  (%close epoll-fd))
 
 (declaim (ftype (function (epoll operation fd &rest (or null event foreign-pointer)) *) control))
 (defun control (epoll-fd operation fd &rest events)
@@ -104,3 +111,10 @@
       ((minusp retval) (simple-perror "epoll-wait"))
       ((zerop retval) (error 'timeout :seconds (/ timeout-ms 10000)))
       (t retval))))
+
+(defmacro with-epoll ((fd events max-events &key (close-on-exec t)) &body body)
+  `(let ((,fd (make-epoll :close-on-exec ,close-on-exec)))
+     (unwind-protect
+          (cffi:with-foreign-object (,events '(:struct epoll-event) ,max-events)
+            ,@body)
+       (epoll-close ,fd))))

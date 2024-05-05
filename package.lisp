@@ -14,6 +14,8 @@
            #:errno
 
            ;; Lisp types
-           #:fd #:epoll #:operation #:event
+           #:fd #:epoll #:operation #:event #:timeout #:seconds
            ;; Low level lisp wrappers
-           #:make-epoll #:control #:wait))
+           #:make-epoll #:control #:wait
+           ;; Macros
+           #:with-epoll))
